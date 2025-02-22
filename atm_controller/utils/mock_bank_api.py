@@ -1,19 +1,6 @@
 from typing import Optional, Dict, Union
 
-class BankAPI:
-    def verify_pin_number(self, card_number: str, pin: str) -> bool:
-        raise NotImplementedError
-
-    def get_account(self, card_number: str, account_type: str) -> Optional[str]:
-        raise NotImplementedError
-
-    def deposit(self, account: str, amount: int) -> bool:
-        raise NotImplementedError
-
-    def withdraw(self, account: str, amount: int) -> bool:
-        raise NotImplementedError
-
-class MockBankAPI(BankAPI):
+class MockBankAPI:
     """
         Just assume that the bank works as the below
     """
