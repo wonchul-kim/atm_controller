@@ -4,7 +4,6 @@ from abc import abstractmethod, ABC
 class BaseATMController(ABC):
     def __init__(self, bank_api: Optional[str]):
         self.bank_api = bank_api
-        self._connected_to_bank = False
         self._reset()
         
     @property 
@@ -13,10 +12,6 @@ class BaseATMController(ABC):
 
     @bank_api.setter 
     def bank_api(self, val):
-        
-        if val is not None:
-            self.check_bank_api(val)
-            
         self._bank_api = val
         
     @property 
@@ -26,6 +21,14 @@ class BaseATMController(ABC):
     @inserted_card_number.setter 
     def inserted_card_number(self, val):
         self._inserted_card_number = val
+
+    @property 
+    def pin_number(self):
+        return self._pin_number
+
+    @pin_number.setter 
+    def pin_number(self, val):
+        self._pin_number = val
     
     @property 
     def inserted_card_account(self):
@@ -39,31 +42,36 @@ class BaseATMController(ABC):
     def insert_card(self, card_number: str) -> bool:
         self.inserted_card_number = card_number
     
-    @abstractmethod
-    def enter_pin_number(self, pin_number: str) -> bool:
+    def check_pin_number(self, pin_number: str) -> bool:
         if not self._check_inserted_card_number():
             return False 
             
-    @abstractmethod
+        if not self.bank_api.verify_pin_number(self.inserted_card_number, pin_number):
+            return False 
+        else:
+            self.pin_number = pin_number
+            return True
+    
     def select_account(self) -> bool:
         if not self._check_inserted_card_number():
             return False
         
+        self.inserted_card_account = self.bank_api.get_account(self.inserted_card_number)
+        
+        return self._check_inserted_card_account()
+        
     @abstractmethod
     def check_balance(self) -> Optional[int]:
-        if not self._check_inserted_card_account() and self._connected_to_bank:
-            return None 
+        pass
     
     @abstractmethod
     def deposit(self, amount: int) -> bool:
-        if not self._check_inserted_card_account() and self._connected_to_bank:
-            return False 
-    
+        pass
+        
     @abstractmethod
     def withdraw(self, amount: int) -> bool:
-        if not self._check_inserted_card_account() and self._connected_to_bank:
-            return False
-    
+        pass
+        
     @abstractmethod
     def eject_card(self) -> bool:
         self._reset()
@@ -77,23 +85,23 @@ class BaseATMController(ABC):
         # function_to_check_bank_api(val)
         # if it is true, 
         self._bank_api = val        
-        self._connected_to_bank = True 
         
         return True 
         
     
     def _check_inserted_card_number(self) -> bool:
-        if self._inserted_card_number:
+        if self.inserted_card_number:
             return True 
         else:
             return False
         
     def _check_inserted_card_account(self) -> bool:
-        if self._inserted_card_account:
+        if self.inserted_card_account:
             return True 
         else:
             return False
         
     def _reset(self) -> None:
-        self._inserted_card_number: Optional[str] = None 
-        self._inserted_card_account: Optional[str] = None 
+        self.inserted_card_number: Optional[str] = None 
+        self.pin_number: Optional[str] = None 
+        self.inserted_card_account: Optional[str] = None 
