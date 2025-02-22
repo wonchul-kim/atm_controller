@@ -5,6 +5,12 @@ class ATMController(BaseATMController):
     def __init__(self, bank_api: Optional[str]):
         super().__init__(bank_api=bank_api)
     
+    def check_bank_api(self) -> bool:
+        # TODO: I assume that there must be something like to check api health
+        # now it is true as default
+        
+        return True     
+    
     def insert_card(self, card_number: str) -> bool:
         super().insert_card(card_number)
         
@@ -38,6 +44,7 @@ class ATMController(BaseATMController):
         if not self._check_inserted_card_account():
             return False
         
+        # if there is no momey, disable withdraw
         if self.inserted_card_account['balance'] < amount:
             return False
         

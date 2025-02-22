@@ -4,6 +4,7 @@ from abc import abstractmethod, ABC
 class BaseATMController(ABC):
     def __init__(self, bank_api: Optional[str]):
         self.bank_api = bank_api
+        self.check_bank_api()
         self._reset()
         
     @property 
@@ -76,18 +77,9 @@ class BaseATMController(ABC):
     def eject_card(self) -> bool:
         self._reset()
     
-    def check_bank_api(self, val: str) -> bool:
-        """
-            I assume that there must be some function to check bank api
-            including health check the communication with bank
-        """
-
-        # function_to_check_bank_api(val)
-        # if it is true, 
-        self._bank_api = val        
-        
-        return True 
-        
+    @abstractmethod
+    def check_bank_api(self) -> bool:
+        pass
     
     def _check_inserted_card_number(self) -> bool:
         if self.inserted_card_number:
